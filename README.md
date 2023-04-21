@@ -16,5 +16,5 @@ gpt_prompt_dir=~/mydata/gpt/prompts
 # Limitations
 * I've not yet included prompt adding/editing
 * I didn't include tab completion [yet]
-
+* I left a bunch of commented-out references and stuff in there, but the code itself (and what ends up stored in a bash function) should be pretty clean
 
