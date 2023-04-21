@@ -3,12 +3,12 @@ Manage GPTChat Pre/Prompts - Select and Copy to Clipboard
 
 # Usage
 1. Clone repo
-2. Add variable "gpt_prompt_dir=" to your bashrc and source the bash script, like:
+2. Add variable "gpt\_prompt\_dir=" to your bashrc and source the bash script, like:
 ```bash
 gpt_prompt_dir=~/mydata/gpt/prompts
 . ~/bin/gptchat-shell-helpers/bash-gpt-prompt-tools
-3. Run `gptprompt` or `gptprompt some_string`.  (Providing a string will do an initial filtration of the results)
 ```
+3. Run `gptprompt` or `gptprompt some_string`.  (Providing a string will do an initial filtration of the results)
 
 # Dependencies
 * This uses fzf for the listing/selection
