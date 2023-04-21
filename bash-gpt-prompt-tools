@@ -16,7 +16,7 @@ gptprompt_fzf_proper=${ourdir}/fzf-proper
 gptprompt_fzf_preview_height=5
 
 # Some references from another project:
-: '
+: <<'COMMENT'
 delete_me_padd () {
 	local pdir
 	local cmtu=''  # User comment
@@ -73,7 +73,7 @@ delete_me_prm () {
 		fi
 	}
 }
-'
+COMMENT
 
 gptprompt () {
 	local re
@@ -108,7 +108,7 @@ gptprompt_fzf_cmd=("$gptprompt_fzf_proper" -zz --delimiter=$' ' --preview='cat -
          --preview-window=top:$gptprompt_fzf_preview_height)
 
 # Bash completion reference, from another project
-: '
+: <<'COMMENT'
 _pcdt_complete() {
 	local re
 	# echo "CHDIR($handydir_base)"
@@ -133,4 +133,4 @@ _pcdt_complete() {
 }
 complete -F _pcdt_complete pcdt
 alias project_dir_pcd_padd='echo "Use pcd, padd, prm'
-'
+COMMENT
