@@ -1,0 +1,54 @@
+#!/bin/bash
+height_perc=50
+args=("$@")
+fzf_args=()
+for i in "$@"; do
+	if [[ $i = -z ]]; then
+		fzf_args+=(--read0)
+		map_args+=(-d '')
+	elif [[ $i = -zz ]]; then
+		fzf_args+=(--read0 --print0)
+		map_args+=(-d '')
+	else
+		fzf_args+=("$i")
+	fi
+done
+
+# Calculate FZF height:
+# If we're getting piped and we have the term lines, then
+# we'll have to get the input ourselves, because fzf [is a bit silly and]
+# doesn't have a --max-height option (and we wants it).
+lines=$(tput lines)
+lines=$((lines*100/height_perc))
+# printf '%s\n' "${fzf_args[@]}"
+# exit
+if [[ ! -t 0  && "$lines" -gt 0 ]]; then
+	mapfile -t "${map_args[@]}" inputs
+	# printf 'Map args: '
+	# printf ' {%s} ' "${map_args[@]}"; echo
+	# printf 'Inputs:'
+	# printf ' %s ' "${inputs[@]}"; echo
+	inplen=${#inputs[*]}
+	preview_height=13
+	inplen=$((inplen+4+preview_height+2)) # for prompt, border, etc.
+	if [[ $inplen -lt $lines ]]; then
+		fzf_args+=("--height=$inplen")
+	fi
+	# printf 'fzf args:'
+	# printf ' %s\n' "${fzf_args[@]}"
+	fzf +s +m --exact --tiebreak=end --no-sort --no-multi \
+	  --color='bg+:#002000,info:#BDBB72,border:#6B6B6B,spinner:#98BC99' \
+	  --color='hl:#f19892,fg:#D9D9D9,header:#719872,fg+:#D9D9D9' \
+	  --color='pointer:#E12672,marker:#E17899,prompt:#98BEDE,hl+:#f8BC99' \
+	  --read0 --print0 --border \
+	  "${fzf_args[@]}" \
+		< <(printf '%s\0' "${inputs[@]}")
+	# --preview='head -$LINES {}'
+fi
+
+# mapfile -t 
+# -ne 'hi\0you\0'
+#fzf +s +m --exact -q "rot" --tiebreak=end --nosort --no-multi --read0 --print0  # --preview=command  # --nosort --no-multi --read0 --print0
+#fzf +s +m --exact "${args[@]}" --tiebreak=end --nosort --no-multi --read0 --print0  # --preview=command  # --nosort --no-multi --read0 --print0
+
+# --preview=command  # --nosort --no-multi --read0 --print0
