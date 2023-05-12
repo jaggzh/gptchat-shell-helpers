@@ -75,6 +75,7 @@ delete_me_prm () {
 }
 COMMENT
 
+alias gptpromptcd="cd $gpt_prompt_dir"
 gptprompt () {
 	local re
 	# echo "CHDIR($gpt_prompt_dir)"
