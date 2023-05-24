@@ -1,40 +1,76 @@
 #!/bin/bash
+. ansi.sh
 show_role=true
 role_condition='.message.author.role == "user" or .message.author.role == "assistant"'
+regex=""
+filter_out=false
+color_enabled=true
+
 print_help() {
-    echo "Usage: $0 [OPTIONS] [file]"
-	echo "Parse a ChatGPT JSON (exported history) file or stdin to extract text based on roles"
-    echo ""
-    echo "Options:"
-    echo "-R              Do not output the role"
-    echo "-a              Assistant role only"
-    echo "-u              User role only"
-    echo "-h, --help      Display this help message and exit"
-    echo ""
-    echo "If no file is provided, the script will read from stdin."
+	cat <<-'EOT'
+		Usage: $0 [OPTIONS] [file]
+		Parse a ChatGPT JSON (exported history) file or stdin to extract text
+		(You can filter based on who said it (you vs. chatgpt). (This is called
+		 the "role" in the json file.)
+
+		Options:
+		-R			Do not output the role
+		-a			Assistant role only
+		-u			User role only
+		--re REGEX		Include only entries matching REGEX
+		--er REGEX		Exclude entries matching REGEX
+		-c			Enable coloring (default)
+		-C			Disable coloring
+		-h, --help		Display this help message and exit
+
+		If no file is provided, the script will read from stdin.
+	EOT
 }
+
 print_error() {
-    echo "Invalid option: $1" >&2
-    echo "Use -h or --help to get usage information." >&2
-    exit 1
+	echo "Invalid option: $1" >&2
+	echo "Use -h or --help to get usage information." >&2
+	exit 1
 }
 
 while (( $# )); do
-    case "$1" in
-        -R) show_role=false; shift ;;
-        -a) role_condition='.message.author.role == "assistant"'; shift ;;
-        -u) role_condition='.message.author.role == "user"'; shift ;;
-        -h|--help) print_help; exit 0 ;;
-        -*) print_error "$1" ;;
-        *) break ;;
-    esac
+	case "$1" in
+		-R) show_role=false; shift ;;
+		-a) role_condition='.message.author.role == "assistant"'; shift ;;
+		-u) role_condition='.message.author.role == "user"'; shift ;;
+		--re) shift; regex="$1"; shift ;;
+		--er) shift; regex="$1"; filter_out=true; shift ;;
+		-c) color_enabled=true; shift ;;
+		-C) color_enabled=false; shift ;;
+		-h|--help) print_help; exit 0 ;;
+		-*) print_error "$1" ;;
+		*) break ;;
+	esac
 done
 
-# If a filename is provided as the argument, use it. Otherwise, use '-' to read from stdin.
-filename=${1:--}
+if [[ $# -lt 1 ]]; then
+	echo "Reading from stdin..." >&2
+	filename=-
+else
+	filename=$1
+fi
 
 if $show_role; then
-    jq -r ".[].mapping[] | select($role_condition) | .message.author.role + \": \" + .message.content.parts[0]" "$filename"
+	output=$(jq -r ".[].mapping[] | select($role_condition) | .message.author.role + \": \" + .message.content.parts[0]" "$filename")
 else
-    jq ".[].mapping[] | select($role_condition) | .message.content.parts[0]" "$filename"
+	output=$(jq ".[].mapping[] | select($role_condition) | .message.content.parts[0]" "$filename")
 fi
+
+if [[ -n "$regex" ]]; then
+	if $filter_out; then
+		output=$(perl -nle "print unless /$regex/i" <<<"$output")
+	else
+		output=$(perl -nle "print if /$regex/i" <<<"$output")
+	fi
+
+	if $color_enabled; then
+		output=$(perl -pe "s/($regex)/${bcyae}\$1${rste}/ig" <<<"$output")
+	fi
+fi
+
+echo "$output"
