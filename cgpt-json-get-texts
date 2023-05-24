@@ -1,0 +1,40 @@
+#!/bin/bash
+show_role=true
+role_condition='.message.author.role == "user" or .message.author.role == "assistant"'
+print_help() {
+    echo "Usage: $0 [OPTIONS] [file]"
+    echo "Parse a JSON file or stdin to extract text based on roles"
+    echo ""
+    echo "Options:"
+    echo "-R              Do not output the role"
+    echo "-a              Assistant role only"
+    echo "-u              User role only"
+    echo "-h, --help      Display this help message and exit"
+    echo ""
+    echo "If no file is provided, the script will read from stdin."
+}
+print_error() {
+    echo "Invalid option: $1" >&2
+    echo "Use -h or --help to get usage information." >&2
+    exit 1
+}
+
+while (( $# )); do
+    case "$1" in
+        -R) show_role=false; shift ;;
+        -a) role_condition='.message.author.role == "assistant"'; shift ;;
+        -u) role_condition='.message.author.role == "user"'; shift ;;
+        -h|--help) print_help; exit 0 ;;
+        -*) print_error "$1" ;;
+        *) break ;;
+    esac
+done
+
+# If a filename is provided as the argument, use it. Otherwise, use '-' to read from stdin.
+filename=${1:--}
+
+if $show_role; then
+    jq -r ".[].mapping[] | select($role_condition) | .message.author.role + \": \" + .message.content.parts[0]" "$filename"
+else
+    jq ".[].mapping[] | select($role_condition) | .message.content.parts[0]" "$filename"
+fi
