@@ -3,7 +3,7 @@ show_role=true
 role_condition='.message.author.role == "user" or .message.author.role == "assistant"'
 print_help() {
     echo "Usage: $0 [OPTIONS] [file]"
-    echo "Parse a JSON file or stdin to extract text based on roles"
+	echo "Parse a ChatGPT JSON (exported history) file or stdin to extract text based on roles"
     echo ""
     echo "Options:"
     echo "-R              Do not output the role"
