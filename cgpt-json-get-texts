@@ -9,9 +9,11 @@ color_enabled=true
 print_help() {
 	cat <<-'EOT'
 		Usage: $0 [OPTIONS] [file]
-		Parse a ChatGPT JSON (exported history) file or stdin to extract text
-		(You can filter based on who said it (you vs. chatgpt). (This is called
-		 the "role" in the json file.)
+		Parse a ChatGPT JSON (exported history) file (or stdin if no file given).
+
+		At present it will let you do some selection of the texts, including regex
+		pattern match (and exclusion), and selecting all text vs. your own ('user')
+		or ChatGPT's ('assistant') -- (Called the "role" in the json file.)
 
 		Options:
 		-R			Do not output the role
